@@ -12,7 +12,19 @@ export function HandResultModal({
   act(a: GameAction): void;
 }) {
   const r = view.lastResult;
-  if (!r) return null;
+  if (!r) {
+    return (
+      <div className="modal-back">
+        <div className="panel result">
+          <div className="prompt-actions">
+            <button className="primary" onClick={() => act({ type: 'continue' })}>
+              {bg.continue}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const me = view.seat % 2;
   const them = 1 - me;
   const rows: [string, (t: number) => number][] = [

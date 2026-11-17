@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { GameAction, PlayerView } from '@belot/engine';
 
 /** Dev-only: with ?bot=1 this tab auto-plays a random legal action 400 ms after it can act. Renders nothing. */
-export const BOT_ENABLED = new URLSearchParams(location.search).get('bot') === '1';
+export const BOT_ENABLED = import.meta.env.DEV && new URLSearchParams(location.search).get('bot') === '1';
 
 const pick = <T,>(xs: T[]): T => xs[Math.floor(Math.random() * xs.length)]!;
 

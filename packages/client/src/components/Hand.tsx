@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Card as CardId, GameAction, PlayerView } from '@belot/engine';
 import { Card } from './Card.js';
 import { DeclarationPrompt } from './DeclarationPrompt.js';
@@ -9,6 +9,11 @@ export function Hand({ view, act }: { view: PlayerView; act(a: GameAction): void
   const myTurn = playing && view.turn === view.seat;
   const n = view.hand.length;
   const decls = myTurn ? view.legal.declarations : [];
+
+  const stillMine = pending !== null && myTurn && view.hand.includes(pending);
+  useEffect(() => {
+    if (pending && !stillMine) setPending(null);
+  }, [pending, stillMine]);
 
   const click = (c: CardId) => {
     const askBelot = view.legal.belotCards.includes(c);
@@ -34,7 +39,7 @@ export function Hand({ view, act }: { view: PlayerView; act(a: GameAction): void
           />
         );
       })}
-      {pending && myTurn && (
+      {pending && stillMine && (
         <DeclarationPrompt
           card={pending}
           declarations={decls}

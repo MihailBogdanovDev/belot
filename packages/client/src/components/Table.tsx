@@ -19,28 +19,39 @@ import { CONTRACT_SYMBOL } from './suits.js';
 function useAnnouncementBubbles(view: PlayerView): Record<number, string> {
   const [bubbles, setBubbles] = useState<Record<number, string>>({});
   const seen = useRef(view.announcements.length);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const n = view.announcements.length;
   useEffect(() => {
-    const from = n < seen.current ? n : seen.current;
+    const reset = n < seen.current;
+    const from = reset ? 0 : seen.current;
     seen.current = n;
+    if (reset) setBubbles({});
     const fresh = view.announcements.slice(from);
     if (fresh.length === 0) return;
+    const texts = fresh.map((a) => [a.seat, bg.decl[a.kind]] as const);
     setBubbles((b) => {
       const next = { ...b };
-      for (const a of fresh) next[a.seat] = bg.decl[a.kind];
+      for (const [seat, t] of texts) next[seat] = t;
       return next;
     });
-    const t = setTimeout(
-      () =>
-        setBubbles((b) => {
-          const next = { ...b };
-          for (const a of fresh) delete next[a.seat];
-          return next;
-        }),
-      3000,
+    timers.current.push(
+      setTimeout(
+        () =>
+          setBubbles((b) => {
+            const next = { ...b };
+            for (const [seat, t] of texts) if (next[seat] === t) delete next[seat];
+            return next;
+          }),
+        3000,
+      ),
     );
-    return () => clearTimeout(t);
   }, [n]);
+  useEffect(
+    () => () => {
+      timers.current.forEach(clearTimeout);
+    },
+    [],
+  );
   return bubbles;
 }
 

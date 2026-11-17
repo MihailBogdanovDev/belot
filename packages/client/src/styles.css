@@ -140,7 +140,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 .bid-actions button { min-width: 100px; font-weight: 600; }
 
 /* ---------- Task 10: declarations, announcements, results ---------- */
-:root { --cw-xs: calc(var(--cw) * 0.32); --gold: #ffd54f; }
+:root { --cw-xs: calc(var(--cw) * 0.44); --gold: #ffd54f; }
 .pcard-xs { --w: var(--cw-xs); border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 .pcard-xs .pcard-corner.br { display: none; }
 .pcard-xs .pcard-corner.tl { font-size: 0.95em; top: 0.12em; left: 0.1em; }
@@ -206,3 +206,6 @@ button.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,
 .gameover-win.lost { color: #ff8a80; }
 .gameover-score { text-align: center; font-size: 18px; }
 .gameover-score b { color: var(--gold); }
+
+.opp-top .bubble { top: 16px; left: 100%; margin-left: 12px; transform: translateY(-50%); }
+.opp-top .bubble::after { left: -5px; bottom: auto; top: 50%; margin: -5px 0 0 0; border: 5px solid transparent; border-left: 0; border-right-color: #fff; border-top-color: transparent; }
