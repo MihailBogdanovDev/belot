@@ -7,6 +7,7 @@ import { generateToken } from './token.js';
 export interface PublicSeat {
   name: string;
   connected: boolean;
+  bot: boolean;
 }
 export interface TableMessage {
   seats: (PublicSeat | null)[];
@@ -20,6 +21,8 @@ export interface TableApi {
   error: string | null;
   sit(seat: Seat, name: string): void;
   leave(): void;
+  addBot(seat: Seat): void;
+  removeBot(seat: Seat): void;
   act(a: GameAction): void;
   resetTable(): void;
 }
@@ -74,6 +77,8 @@ export function useTable(): TableApi {
 
   const sit = useCallback((seat: Seat, name: string) => socketRef.current?.emit('sit', { seat, name }), []);
   const leave = useCallback(() => socketRef.current?.emit('leave'), []);
+  const addBot = useCallback((seat: Seat) => socketRef.current?.emit('addBot', { seat }), []);
+  const removeBot = useCallback((seat: Seat) => socketRef.current?.emit('removeBot', { seat }), []);
   const act = useCallback((a: GameAction) => {
     const s = socketRef.current;
     if (!s) return;
@@ -83,5 +88,5 @@ export function useTable(): TableApi {
   }, []);
   const resetTable = useCallback(() => socketRef.current?.emit('resetTable'), []);
 
-  return { msg, connected, error, sit, leave, act, resetTable };
+  return { msg, connected, error, sit, leave, addBot, removeBot, act, resetTable };
 }

@@ -24,11 +24,28 @@ export async function createServer(port: number): Promise<{ port: number; close(
   const table = new Table(cryptoRng);
   const tokens = new Map<string, string>(); // socket.id -> token
 
+  const botDelay = Number(process.env.BOT_DELAY_MS ?? 900);
+  let botTimer: ReturnType<typeof setTimeout> | null = null;
+  // One bot move per tick, so humans can follow what the bots play.
+  const scheduleBots = () => {
+    if (botTimer) return;
+    botTimer = setTimeout(() => {
+      botTimer = null;
+      if (table.stepBots()) broadcast();
+    }, botDelay);
+  };
+
   const broadcast = () => {
     for (const [id, s] of io.sockets.sockets) {
       const token = tokens.get(id);
       if (token) s.emit('table', table.messageFor(token));
     }
+    scheduleBots();
+  };
+
+  const seatArg = (p: unknown): Seat | null => {
+    const seat = isObj(p) ? p.seat : undefined;
+    return typeof seat === 'number' && Number.isInteger(seat) && seat >= 0 && seat <= 3 ? (seat as Seat) : null;
   };
 
   io.on('connection', (socket: Socket) => {
@@ -74,6 +91,18 @@ export async function createServer(port: number): Promise<{ port: number; close(
     });
 
     socket.on('leave', () => withToken((token) => table.leave(token)));
+    socket.on('addBot', (p: unknown) =>
+      withToken(() => {
+        const seat = seatArg(p);
+        return seat === null ? 'Невалидно място' : table.addBot(seat);
+      }),
+    );
+    socket.on('removeBot', (p: unknown) =>
+      withToken(() => {
+        const seat = seatArg(p);
+        return seat === null ? 'Невалидно място' : table.removeBot(seat);
+      }),
+    );
     const advance = (type: 'continue' | 'newGame') => {
       const token = tokens.get(socket.id);
       if (token && table.isStaleAdvance(token, type)) return; // duplicate click from another seat: ignore silently
@@ -107,6 +136,7 @@ export async function createServer(port: number): Promise<{ port: number; close(
   return {
     port: (http.address() as AddressInfo).port,
     close: async () => {
+      if (botTimer) clearTimeout(botTimer);
       await io.close(); // closes the http server too
     },
   };

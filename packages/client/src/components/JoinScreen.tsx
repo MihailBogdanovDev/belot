@@ -19,9 +19,11 @@ interface Props {
   connected: boolean;
   sit(seat: Seat, name: string): void;
   leave(): void;
+  addBot(seat: Seat): void;
+  removeBot(seat: Seat): void;
 }
 
-export function JoinScreen({ msg, connected, sit, leave }: Props) {
+export function JoinScreen({ msg, connected, sit, leave, addBot, removeBot }: Props) {
   const [name, setName] = useState(loadName);
   const trimmed = name.trim();
   const seats = msg?.seats ?? [null, null, null, null];
@@ -70,6 +72,11 @@ export function JoinScreen({ msg, connected, sit, leave }: Props) {
                     {s.name}
                   </div>
                   {i === mySeat && !gameStarted && <button onClick={leave}>{bg.leave}</button>}
+                  {s.bot && !gameStarted && (
+                    <button className="secondary" onClick={() => removeBot(i)}>
+                      {bg.removeBot}
+                    </button>
+                  )}
                   {i !== mySeat && mySeat === null && gameStarted && !s.connected && (
                     <button disabled={!canSit} onClick={() => onSeat(i)}>
                       {bg.sitHere}
@@ -77,11 +84,16 @@ export function JoinScreen({ msg, connected, sit, leave }: Props) {
                   )}
                 </>
               ) : (
-                mySeat === null && (
-                  <button disabled={!canSit} onClick={() => onSeat(i)}>
-                    {bg.sitHere}
+                <>
+                  {mySeat === null && (
+                    <button disabled={!canSit} onClick={() => onSeat(i)}>
+                      {bg.sitHere}
+                    </button>
+                  )}
+                  <button className="secondary" disabled={!msg} onClick={() => addBot(i)}>
+                    {bg.addBot}
                   </button>
-                )
+                </>
               )}
             </div>
           );

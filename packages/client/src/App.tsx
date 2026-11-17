@@ -17,7 +17,7 @@ export function App() {
       {view ? (
         <Table msg={t.msg!} act={t.act} />
       ) : (
-        <JoinScreen msg={t.msg} connected={t.connected} sit={t.sit} leave={t.leave} />
+        <JoinScreen msg={t.msg} connected={t.connected} sit={t.sit} leave={t.leave} addBot={t.addBot} removeBot={t.removeBot} />
       )}
     </div>
   );

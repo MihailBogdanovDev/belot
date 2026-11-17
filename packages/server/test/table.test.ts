@@ -54,7 +54,7 @@ describe('Table', () => {
     expect(t.sit('new', 1, 'X')).toBe('Мястото е заето');
     expect(t.sit('new', 2, 'Nova')).toBeNull();
     expect(t.messageFor('new').mySeat).toBe(2);
-    expect(t.messageFor('new').seats[2]).toEqual({ name: 'Nova', connected: true });
+    expect(t.messageFor('new').seats[2]).toEqual({ name: 'Nova', connected: true, bot: false });
     expect(t.hello('t2')).toBeNull();
     expect(t.messageFor('t2').mySeat).toBeNull();
     expect(t.messageFor('t2').view?.hand ?? []).toEqual([]);

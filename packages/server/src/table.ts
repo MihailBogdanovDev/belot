@@ -1,9 +1,11 @@
 import {
   applyAction,
+  chooseBotAction,
   newGame,
   viewFor,
   type GameAction,
   type GameState,
+  type Phase,
   type PlayerView,
   type Rng,
   type Seat,
@@ -12,6 +14,7 @@ import {
 export interface PublicSeat {
   name: string;
   connected: boolean;
+  bot: boolean;
 }
 export interface TableMessage {
   seats: (PublicSeat | null)[];
@@ -22,6 +25,7 @@ export interface TableMessage {
 interface Occupant {
   token: string;
   name: string;
+  bot?: boolean;
 }
 
 const ERRORS: Record<string, string> = {
@@ -54,6 +58,10 @@ export class Table {
     return (this.conns.get(token) ?? 0) > 0;
   }
 
+  private startIfFull(): void {
+    if (!this.game && this.seats.every((s) => s !== null)) this.game = newGame(this.rng);
+  }
+
   hello(token: string): Seat | null {
     this.conns.set(token, (this.conns.get(token) ?? 0) + 1);
     return this.seatOf(token);
@@ -75,7 +83,7 @@ export class Table {
     }
     if (this.game) return 'Мястото е заето';
     this.seats[seat] = { token, name };
-    if (this.seats.every((s) => s !== null)) this.game = newGame(this.rng);
+    this.startIfFull();
     return null;
   }
 
@@ -103,6 +111,52 @@ export class Table {
     return this.game.phase !== (type === 'continue' ? 'handEnd' : 'gameOver');
   }
 
+  addBot(seat: Seat): string | null {
+    if (this.game) return 'Играта вече е започнала';
+    if (this.seats[seat]) return 'Мястото е заето';
+    this.seats[seat] = { token: `bot:${seat}:${Math.floor(this.rng() * 1e9)}`, name: `Бот ${seat + 1}`, bot: true };
+    this.startIfFull();
+    return null;
+  }
+
+  removeBot(seat: Seat): string | null {
+    if (this.game) return 'Играта вече е започнала';
+    if (!this.seats[seat]?.bot) return 'Там няма бот';
+    this.seats[seat] = null;
+    return null;
+  }
+
+  phase(): Phase | null {
+    return this.game?.phase ?? null;
+  }
+
+  /** Let one bot that can act take its move. Returns true if a bot moved. */
+  stepBots(): boolean {
+    if (!this.game) return false;
+    for (let i = 0; i < 4; i++) {
+      const occ = this.seats[i];
+      if (!occ?.bot) continue;
+      const action = chooseBotAction(viewFor(this.game, i as Seat), this.rng);
+      if (!action) continue;
+      const r = applyAction(this.game, i as Seat, action, this.rng);
+      if (!r.ok) continue;
+      this.game = r.state;
+      return true;
+    }
+    return false;
+  }
+
+  /** Continue a finished hand / start a new game on behalf of the table (used when only bots remain). */
+  advanceAsAnyone(): string | null {
+    if (!this.game) return 'Играта не е започнала';
+    const type = this.game.phase === 'handEnd' ? 'continue' : this.game.phase === 'gameOver' ? 'newGame' : null;
+    if (!type) return DEFAULT_ERROR;
+    const r = applyAction(this.game, 0, { type }, this.rng);
+    if (!r.ok) return DEFAULT_ERROR;
+    this.game = r.state;
+    return null;
+  }
+
   reset(): void {
     this.seats = [null, null, null, null];
     this.game = null;
@@ -115,7 +169,9 @@ export class Table {
   messageFor(token: string): TableMessage {
     const mySeat = this.seatOf(token);
     return {
-      seats: this.seats.map((s) => (s ? { name: s.name, connected: this.isConnected(s.token) } : null)),
+      seats: this.seats.map((s) =>
+        s ? { name: s.name, connected: !!s.bot || this.isConnected(s.token), bot: !!s.bot } : null,
+      ),
       mySeat,
       view: this.game && mySeat !== null ? viewFor(this.game, mySeat) : null,
     };

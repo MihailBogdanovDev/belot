@@ -14,6 +14,8 @@ export const bg = {
   tableFull: 'Масата е пълна',
   namePlaceholder: 'Твоето име',
   sitHere: 'Седни тук',
+  addBot: 'Добави бот',
+  removeBot: 'Махни',
   takeSeat: (n: string) => `Заеми мястото на ${n}?`,
   continue: 'Продължи',
   newGame: 'Нова игра',
