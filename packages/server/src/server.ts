@@ -41,14 +41,24 @@ export async function createServer(port: number): Promise<{ port: number; close(
       broadcast();
     };
 
-    socket.on('hello', (p: unknown) => {
-      const token = isObj(p) ? p.token : undefined;
-      if (typeof token !== 'string' || token.length === 0 || token.length > 100) return fail('Невалиден токен');
+    const identify = (p: unknown): string | null => {
+      const token = p;
+      if (typeof token !== 'string' || token.length === 0 || token.length > 100) return 'Невалиден токен';
       const old = tokens.get(socket.id);
-      if (old === token) return broadcast();
+      if (old === token) return null;
       if (old) table.disconnect(old);
       tokens.set(socket.id, token);
       table.hello(token);
+      return null;
+    };
+
+    // Token in the handshake: identified before any buffered emit can arrive.
+    const auth: unknown = socket.handshake.auth;
+    if (isObj(auth) && typeof auth.token === 'string' && !identify(auth.token)) broadcast();
+
+    socket.on('hello', (p: unknown) => {
+      const err = identify(isObj(p) ? p.token : undefined);
+      if (err) return fail(err);
       broadcast();
     });
 
@@ -64,9 +74,18 @@ export async function createServer(port: number): Promise<{ port: number; close(
     });
 
     socket.on('leave', () => withToken((token) => table.leave(token)));
-    socket.on('action', (p: unknown) => withToken((token) => table.act(token, p as GameAction)));
-    socket.on('continue', () => withToken((token) => table.act(token, { type: 'continue' })));
-    socket.on('newGame', () => withToken((token) => table.act(token, { type: 'newGame' })));
+    const advance = (type: 'continue' | 'newGame') => {
+      const token = tokens.get(socket.id);
+      if (token && table.isStaleAdvance(token, type)) return; // duplicate click from another seat: ignore silently
+      withToken((t) => table.act(t, { type }));
+    };
+    socket.on('action', (p: unknown) => {
+      const type = isObj(p) ? p.type : undefined;
+      if (type === 'continue' || type === 'newGame') return advance(type);
+      withToken((token) => table.act(token, p as GameAction));
+    });
+    socket.on('continue', () => advance('continue'));
+    socket.on('newGame', () => advance('newGame'));
     socket.on('resetTable', () =>
       withToken((token) => {
         if (!table.isSeated(token)) return 'Не си седнал';

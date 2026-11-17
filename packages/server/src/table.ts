@@ -97,6 +97,12 @@ export class Table {
     return null;
   }
 
+  /** True when a continue/newGame would be a stale duplicate (phase already moved on). */
+  isStaleAdvance(token: string, type: 'continue' | 'newGame'): boolean {
+    if (this.seatOf(token) === null || !this.game) return false;
+    return this.game.phase !== (type === 'continue' ? 'handEnd' : 'gameOver');
+  }
+
   reset(): void {
     this.seats = [null, null, null, null];
     this.game = null;

@@ -123,4 +123,53 @@ describe('server', () => {
     s.emit('sit', { seat: 0, name: '   ' });
     await until(() => errs.length === 4);
   });
+
+  it('restores the seat from handshake auth without hello', async () => {
+    const srv = await boot();
+    const a = connect(srv.port, 'a');
+    await until(() => a.s.connected);
+    a.s.emit('sit', { seat: 1, name: 'A' });
+    await until(() => a.last?.mySeat === 1);
+    a.s.close();
+    const s = io(`http://localhost:${srv.port}`, { transports: ['websocket'], forceNew: true, auth: { token: 'a' } });
+    closers.push(() => {
+      s.close();
+    });
+    let msg: TableMessage | null = null;
+    s.on('table', (m: TableMessage) => (msg = m));
+    await until(() => (msg as TableMessage | null)?.mySeat === 1);
+  });
+
+  it('ignores a second continue once the hand already advanced', async () => {
+    const srv = await boot();
+    const clients = [0, 1, 2, 3].map((i) => connect(srv.port, `t${i}`));
+    const errs: string[] = [];
+    clients.forEach((c) => c.s.on('error', (e: { message: string }) => errs.push(e.message)));
+    await until(() => clients.every((c) => c.s.connected));
+    clients.forEach((c, i) => c.s.emit('sit', { seat: i, name: `P${i}` }));
+    await until(() => clients.every((c) => c.last?.view));
+    // drive until handEnd
+    const drive = (c: Client) => {
+      const v = c.last!.view!;
+      const a = pick(v);
+      if (a && !(a.type === 'continue')) c.s.emit('action', a);
+    };
+    const t0 = Date.now();
+    while (!clients.every((c) => c.last?.view?.phase === 'handEnd')) {
+      if (Date.now() - t0 > 20000) throw new Error('no handEnd');
+      const before = clients[0]!.last;
+      clients.forEach((c) => c.last?.view && c.last.view.phase !== 'handEnd' && drive(c));
+      await new Promise((r) => setTimeout(r, 20));
+      void before;
+    }
+    errs.length = 0;
+    const n = clients[0]!.last!.view!.history.length;
+    clients[0]!.s.emit('continue');
+    clients[1]!.s.emit('continue');
+    await until(() => clients.every((c) => c.last!.view!.phase !== 'handEnd'));
+    await new Promise((r) => setTimeout(r, 150));
+    expect(errs).toEqual([]);
+    expect(clients[0]!.last!.view!.history.length).toBe(n);
+    expect(clients[0]!.last!.view!.phase).toBe('cut');
+  }, 30000);
 });
