@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyAction, cutterOf, newGame, type GameAction, type GameState } from '../src/game.js';
+import { findDeclarations } from '../src/declarations.js';
 import { viewFor } from '../src/view.js';
 import { gatherAfterPlay, gatherAfterThrowIn } from '../src/deck.js';
 import { fullDeck, nextSeat } from '../src/cards.js';
@@ -115,11 +116,20 @@ describe('game', () => {
   });
 
   it('declarations only on first card', () => {
-    let s = toPlaying();
-    // play first trick, then try declaring with a bogus id on the second
-    for (let i = 0; i < 4; i++) s = act(s, s.turn, { type: 'play', card: viewFor(s, s.turn).legal.cards[0]! });
-    const card = viewFor(s, s.turn).legal.cards[0]!;
-    expect(applyAction(s, s.turn, { type: 'play', card, declarations: ['tierce:7C,8C,9C'] }, rng).ok).toBe(false);
+    const base = toPlaying('H');
+    const s: GameState = {
+      ...base,
+      turn: 0,
+      hands: [['7C', '8C', '9C', 'AD'], [], [], []],
+      tricks: [{ cards: [], winner: 0 }],
+    };
+    const decl = findDeclarations(s.hands[0]!, 'H')[0]!;
+    expect(decl.id).toBeTruthy();
+    const r = applyAction(s, 0, { type: 'play', card: 'AD', declarations: [decl.id] }, rng);
+    expect(r).toEqual({ ok: false, error: 'declarations only with the first card' });
+    // same declaration is accepted on trick 0
+    const ok0 = applyAction({ ...s, tricks: [] }, 0, { type: 'play', card: 'AD', declarations: [decl.id] }, rng);
+    expect(ok0.ok).toBe(true);
   });
 
   it('declares available declarations on first card and rejects unavailable / ineligible belot', () => {
@@ -194,6 +204,25 @@ describe('game', () => {
     s = act(s, 1, { type: 'newGame' });
     expect(s.phase).toBe('cut');
     expect(s.scores).toEqual([0, 0]);
+  });
+
+  it('discards hanging pot when the game ends', () => {
+    let found = false;
+    for (let seed = 1; seed <= 3000 && !found; seed++) {
+      const r = mulberry32(seed);
+      let s = cut(newGame(r));
+      s = act(s, s.turn, { type: 'bid', contract: 'NT' });
+      for (let i = 0; i < 3; i++) s = act(s, s.turn, { type: 'pass' });
+      s = { ...s, scores: [150, 149] };
+      s = playHand(s);
+      if (s.lastResult!.outcome === 'hanging' && s.phase === 'gameOver') {
+        found = true;
+        expect(s.lastResult!.hangingPotAfter).toBeGreaterThan(0);
+        expect(s.hangingPot).toBe(0);
+        expect(viewFor(s, 0).hangingPot).toBe(0);
+      }
+    }
+    expect(found).toBe(true);
   });
 
   it('view hides other hands', () => {

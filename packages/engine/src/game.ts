@@ -47,7 +47,7 @@ export function newGame(rng: Rng): GameState {
   return {
     phase: 'cut',
     dealer,
-    turn: cutterOf({ dealer } as GameState),
+    turn: ((dealer + 3) % 4) as Seat,
     deck: shuffle(fullDeck(), rng),
     hands: [[], [], [], []],
     bidding: null,
@@ -216,6 +216,7 @@ function doPlay(s: GameState, seat: Seat, a: Extract<GameAction, { type: 'play' 
   s.phase = 'handEnd';
   if (result.valatTeam === null && Math.max(s.scores[0], s.scores[1]) >= 151 && s.scores[0] !== s.scores[1]) {
     s.winner = (s.scores[0] > s.scores[1] ? 0 : 1) as Team;
+    s.hangingPot = 0;
     s.phase = 'gameOver';
   }
   return ok(s);
