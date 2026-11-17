@@ -135,6 +135,17 @@ describe('scoreHand', () => {
     expect(r.hangingPotAfter).toBe(0);
   });
 
+  it('pins tie flags: suit 106/106 hanging, defenders round 10, pot 11', () => {
+    // team0 96 cards + last ten = 106; team1 56 cards + quarte 50 = 106
+    const tricks = build('H', [1, 1, 1, 1, 0, 0, 0, 0] as Team[], 96);
+    const quarte = findDeclarations(['7S', '8S', '9S', '10S', 'JD', 'QD', 'KC', 'AC'], 'H').find((d) => d.kind === 'quarte')!;
+    const r = scoreHand(base({ tricks, declared: [{ seat: 1, decl: quarte }] }));
+    expect(r.breakdown.map((b) => b.total)).toEqual([106, 106]);
+    expect(r.outcome).toBe('hanging');
+    expect(r.gamePoints).toEqual([0, 10]);
+    expect(r.hangingPotAfter).toBe(11);
+  });
+
   it('belot always counts', () => {
     const tricks = build('H', [1, 1, 1, 1, 1, 1, 1, 0] as Team[], 40);
     const r = scoreHand(base({ tricks, belots: [0] }));
