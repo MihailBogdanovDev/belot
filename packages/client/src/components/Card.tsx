@@ -4,7 +4,7 @@ import { SUIT_SYMBOL, isRed } from './suits.js';
 export interface CardProps {
   card?: CardId;
   faceDown?: boolean;
-  size?: 'md' | 'sm';
+  size?: 'md' | 'sm' | 'xs';
   highlighted?: boolean;
   dimmed?: boolean;
   onClick?: () => void;
