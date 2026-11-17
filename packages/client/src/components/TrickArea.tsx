@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { PlayedCard, PlayerView, Seat } from '@belot/engine';
 import { relativePosition } from '../layout.js';
 import { Card } from './Card.js';
@@ -17,7 +17,7 @@ export function TrickArea({ view }: { view: PlayerView }) {
   const key = keyOf(view);
   const trickLen = view.trick.length;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const changed = key !== seen.current;
     seen.current = key;
     if (trickLen > 0) {
@@ -32,7 +32,6 @@ export function TrickArea({ view }: { view: PlayerView }) {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, trickLen]);
 
   const cards = trickLen > 0 ? view.trick : (held?.cards ?? []);

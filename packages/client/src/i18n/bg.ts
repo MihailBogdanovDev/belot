@@ -32,6 +32,5 @@ export const bg = {
   connecting: 'Свързване…',
   menu: 'Меню',
   dealerChip: 'Р',
-  bidPrefix: 'Обява',
-  deck: 'Тесте',
+  contractShort: { NT: 'БК', AT: 'ВК' },
 };

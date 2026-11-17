@@ -27,16 +27,21 @@ export function Table({ msg, act }: { msg: TableMessage; act(a: GameAction): voi
           {c.multiplier === 4 && <b className="cb-mult"> ×4 {bg.recontra}</b>}
         </div>
       )}
-      {([0, 1, 2, 3] as Seat[]).map((s) => (
-        <Opponent key={s} view={view} seat={s} info={seats[s] ?? null} pos={relativePosition(view.seat, s)} />
-      ))}
+      {([0, 1, 2, 3] as Seat[])
+        .filter((s) => s !== view.seat)
+        .map((s) => (
+          <Opponent key={s} view={view} seat={s} info={seats[s] ?? null} pos={relativePosition(view.seat, s)} />
+        ))}
       <div className="center">
         {view.phase === 'cut' && <CutPicker view={view} seats={seats} act={act} />}
         {view.phase === 'bidding' && <BiddingPanel view={view} act={act} />}
         {(view.phase === 'playing' || view.phase === 'handEnd') && <TrickArea view={view} />}
       </div>
-      {myTurn && <div className="turn-banner">{bg.yourTurn}</div>}
-      <Hand view={view} act={act} />
+      <div className="bottom">
+        <div className="turn-slot">{myTurn && <div className="turn-banner">{bg.yourTurn}</div>}</div>
+        <Opponent view={view} seat={view.seat} info={seats[view.seat] ?? null} pos="bottom" />
+        <Hand view={view} act={act} />
+      </div>
     </div>
   );
 }

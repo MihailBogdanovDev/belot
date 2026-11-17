@@ -10,7 +10,7 @@ export function Hand({ view, act }: { view: PlayerView; act(a: GameAction): void
       {view.hand.map((c, i) => {
         const legal = myTurn && view.legal.cards.includes(c);
         const rot = (i - (n - 1) / 2) * 3;
-        const drop = Math.abs(i - (n - 1) / 2) ** 2 * 1.2;
+        const drop = Math.abs(i - (n - 1) / 2) ** 2 * 1.2 - (myTurn && view.legal.cards.includes(c) ? 14 : 0);
         return (
           <Card
             key={c}
