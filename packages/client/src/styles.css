@@ -28,6 +28,8 @@ button:disabled { opacity: 0.45; cursor: default; }
 .menu { position: fixed; top: 8px; left: 8px; z-index: 10; }
 .menu-btn { background: rgba(0,0,0,0.4); color: #fff; }
 .menu-pop { margin-top: 6px; background: #fff; border-radius: 8px; padding: 6px; }
+.toast.conn { background: #555; top: 52px; }
+.notice { position: absolute; top: 14%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.7); padding: 8px 18px; border-radius: 8px; z-index: 15; pointer-events: none; }
 .toast { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); background: #b3261e; padding: 8px 16px; border-radius: 8px; z-index: 20; }
 
 /* ---------- Table ---------- */

@@ -2,6 +2,7 @@ import { JoinScreen } from './components/JoinScreen.js';
 import { Table } from './components/Table.js';
 import { Menu } from './components/Menu.js';
 import { BOT_ENABLED, DevBot } from './devBot.js';
+import { bg } from './i18n/bg.js';
 import { useTable } from './net.js';
 
 export function App() {
@@ -9,7 +10,8 @@ export function App() {
   const view = t.msg?.view;
   return (
     <div className="app">
-      <Menu onReset={t.resetTable} />
+      {t.msg?.mySeat != null && <Menu onReset={t.resetTable} />}
+      {view && !t.connected && <div className="toast conn">{bg.connecting}</div>}
       {t.error && <div className="toast">{t.error}</div>}
       {BOT_ENABLED && view && <DevBot view={view} act={t.act} />}
       {view ? (

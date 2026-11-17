@@ -30,6 +30,7 @@ export const bg = {
   leave: 'Стани',
   title: 'Белот',
   connecting: 'Свързване…',
+  allPassed: 'Всички пасуваха',
   menu: 'Меню',
   dealerChip: 'Р',
   play: 'Играй',

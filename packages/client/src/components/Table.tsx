@@ -55,15 +55,34 @@ function useAnnouncementBubbles(view: PlayerView): Record<number, string> {
   return bubbles;
 }
 
+/** Short notice when a bidding round ended with four passes (cut phase, no hand scored). */
+function useAllPassedNotice(view: PlayerView): boolean {
+  const [show, setShow] = useState(false);
+  const prev = useRef({ phase: view.phase, hands: view.history.length });
+  useEffect(() => {
+    const p = prev.current;
+    prev.current = { phase: view.phase, hands: view.history.length };
+    if (p.phase === 'bidding' && view.phase === 'cut' && p.hands === view.history.length) setShow(true);
+  }, [view.phase, view.history.length]);
+  useEffect(() => {
+    if (!show) return;
+    const t = setTimeout(() => setShow(false), 2500);
+    return () => clearTimeout(t);
+  }, [show]);
+  return show;
+}
+
 export function Table({ msg, act }: { msg: TableMessage; act(a: GameAction): void }) {
   const view = msg.view!;
   const seats = msg.seats;
   const name = (s: Seat) => seats[s]?.name ?? '';
   const c = view.contract;
   const bubbles = useAnnouncementBubbles(view);
+  const allPassed = useAllPassedNotice(view);
   const myTurn = view.turn === view.seat && (view.phase === 'playing' || view.phase === 'bidding');
   return (
     <div className="table">
+      {allPassed && <div className="notice">{bg.allPassed}</div>}
       {c && (
         <div className="contract-badge">
           <span className={`cb-sym${c.contract === 'H' || c.contract === 'D' ? ' red' : ''}`}>
@@ -80,7 +99,14 @@ export function Table({ msg, act }: { msg: TableMessage; act(a: GameAction): voi
       {([0, 1, 2, 3] as Seat[])
         .filter((s) => s !== view.seat)
         .map((s) => (
-          <Opponent key={s} view={view} seat={s} info={seats[s] ?? null} pos={relativePosition(view.seat, s)} bubble={bubbles[s]} />
+          <Opponent
+            key={s}
+            view={view}
+            seat={s}
+            info={seats[s] ?? null}
+            pos={relativePosition(view.seat, s)}
+            bubble={bubbles[s]}
+          />
         ))}
       <div className="center">
         {view.phase === 'cut' && <CutPicker view={view} seats={seats} act={act} />}
@@ -89,11 +115,17 @@ export function Table({ msg, act }: { msg: TableMessage; act(a: GameAction): voi
       </div>
       <div className="bottom">
         <div className="turn-slot">{myTurn && <div className="turn-banner">{bg.yourTurn}</div>}</div>
-        <Opponent view={view} seat={view.seat} info={seats[view.seat] ?? null} pos="bottom" bubble={bubbles[view.seat]} />
+        <Opponent
+          view={view}
+          seat={view.seat}
+          info={seats[view.seat] ?? null}
+          pos="bottom"
+          bubble={bubbles[view.seat]}
+        />
         <Hand view={view} act={act} />
       </div>
       {view.phase === 'handEnd' && <HandResultModal view={view} name={name} act={act} />}
-      {view.phase === 'gameOver' && <GameOverModal view={view} act={act} />}
+      {view.phase === 'gameOver' && <GameOverModal view={view} name={name} act={act} />}
     </div>
   );
 }
