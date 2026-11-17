@@ -26,7 +26,7 @@ interface Occupant {
 
 const ERRORS: Record<string, string> = {
   'not your turn': 'Не е твой ред',
-  'only the cutter may cut': 'Само играчът вдясно от раздаващия цепи',
+  'only the cutter may cut': 'Само играчът вляво от раздаващия цепи',
   'not in cut phase': 'Не е време за цепене',
   'not in bidding phase': 'Не е време за наддаване',
   'not in playing phase': 'Не е време за игра',
