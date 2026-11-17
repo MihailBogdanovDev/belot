@@ -5,3 +5,5 @@ export * from './bidding.js';
 export * from './play.js';
 export * from './declarations.js';
 export * from './scoring.js';
+export * from './game.js';
+export * from './view.js';
