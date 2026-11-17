@@ -82,8 +82,7 @@ describe('server', () => {
     );
     await until(() => clients.every((c) => c.s.connected));
     clients.forEach((c, i) => c.s.emit('sit', { seat: i, name: `P${i}` }));
-    await until(() => over, 30000);
-    expect(clients[0]!.last!.view!.phase).toBe('gameOver');
+    await until(() => over && clients.every((c) => c.last?.view?.phase === 'gameOver'), 30000);
   }, 40000);
 
   it('restores seat and hand after reconnect', async () => {

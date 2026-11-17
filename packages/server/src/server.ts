@@ -37,7 +37,7 @@ export async function createServer(port: number): Promise<{ port: number; close(
       const token = tokens.get(socket.id);
       if (!token) return fail('Първо трябва да се представиш');
       const err = fn(token);
-      if (err) fail(err);
+      if (err) return fail(err);
       broadcast();
     };
 
