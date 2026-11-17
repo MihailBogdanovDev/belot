@@ -8,7 +8,7 @@
   "scripts": {
     "test": "npm test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "dev": "concurrently -k -n server,client \"npm run dev -w @belot/server\" \"npm run dev -w @belot/client\"",
+    "dev": "concurrently -k -n server,client \"PORT=3001 npm run dev -w @belot/server\" \"npm run dev -w @belot/client\"",
     "start": "npm start -w @belot/server"
   },
   "devDependencies": {
