@@ -35,6 +35,22 @@ Everyone needs to reach the same server, so it must be on a public host or behin
 
 Hosting needs a **persistent Node process with WebSocket support**, such as Fly.io, Render or Railway (the Docker image works on all of them). Vercel-style serverless hosting does not fit, because the game state lives in server memory and Socket.IO needs long-lived connections.
 
+### Live: <https://belot.fly.dev>
+
+Deployed on Fly.io with [`fly.toml`](fly.toml):
+
+- **Exactly one machine.** The table lives in that machine's memory; a second machine would be a second, separate table. Never scale above 1.
+- **Port 3001** (`internal_port` and `PORT` must match).
+- **Auto-stop** when nobody is connected, auto-start on the next visit (a few seconds' delay). Stopping, restarting or redeploying ends any game in progress.
+
+Redeploy after changes:
+
+```bash
+fly deploy --ha=false
+```
+
+Check status and logs: `fly status`, `fly logs`.
+
 ## Tests
 
 ```bash
