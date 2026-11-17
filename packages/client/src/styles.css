@@ -241,10 +241,7 @@ button.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,
   .opp-left, .opp-right { gap: 4px; }
   .opp-left .plate, .opp-right .plate { padding: 3px 8px; font-size: 13px; }
   .opp-left .plate-name, .opp-right .plate-name { max-width: 56px; }
-  .opp-left .opp-cards, .opp-right .opp-cards { flex-direction: row; }
-  .opp-left .opp-cards .opp-card, .opp-right .opp-cards .opp-card { margin-top: 0; margin-left: calc(var(--cw-sm) * -0.85); }
-  .opp-left .opp-cards .opp-card:first-child, .opp-right .opp-cards .opp-card:first-child { margin-left: 0; }
-  .opp-left .opp-cards, .opp-right .opp-cards, .opp-top .opp-cards { transform: scale(0.8); transform-origin: 50% 0; }
+  .opp-top .opp-cards { transform: scale(0.8); transform-origin: 50% 0; }
   .opp-left .plate .chip, .opp-right .plate .chip { width: 18px; height: 18px; font-size: 10px; }
   .count-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 10px; background: rgba(255,255,255,0.2); font-size: 12px; padding: 0 5px; }
   .opp-bottom .count-chip { display: none; }
@@ -264,6 +261,7 @@ button.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,
   .sb-row:first-child b::after { content: ' :'; color: #fff; font-weight: 400; }
   .sb-pot { margin: 0; font-size: 11px; }
   .sb-toggle { display: none; }
+  .sb-head::after { content: '▾'; opacity: 0.7; font-size: 12px; }
   .sb-table { font-size: 11px; }
   .sb-table th, .sb-table td { padding: 2px 3px; }
 
