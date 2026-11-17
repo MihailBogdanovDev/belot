@@ -28,4 +28,7 @@ export const bg = {
   winnerUs: 'Победа!',
   winnerThem: 'Загуба',
   leave: 'Стани',
+  title: 'Белот',
+  connecting: 'Свързване…',
+  menu: 'Меню',
 };

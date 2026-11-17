@@ -5,7 +5,7 @@ export function Menu({ onReset }: { onReset(): void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="menu">
-      <button className="menu-btn" aria-label="Menu" onClick={() => setOpen((o) => !o)}>
+      <button className="menu-btn" aria-label={bg.menu} onClick={() => setOpen((o) => !o)}>
         ☰
       </button>
       {open && (

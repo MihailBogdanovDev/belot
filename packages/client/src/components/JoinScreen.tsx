@@ -48,7 +48,7 @@ export function JoinScreen({ msg, connected, sit, leave }: Props) {
 
   return (
     <div className="card join">
-      <h1>Белот</h1>
+      <h1>{bg.title}</h1>
       <input
         className="name-input"
         value={name}
@@ -56,7 +56,7 @@ export function JoinScreen({ msg, connected, sit, leave }: Props) {
         placeholder={bg.namePlaceholder}
         onChange={(e) => changeName(e.target.value)}
       />
-      {!connected && <div className="muted">…</div>}
+      {!connected && <div className="muted">{bg.connecting}</div>}
       <div className="join-table">
         {([0, 1, 2, 3] as Seat[]).map((i) => {
           const s = seats[i] ?? null;
