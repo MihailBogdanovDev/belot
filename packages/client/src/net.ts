@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import type { GameAction, PlayerView, Seat } from '@belot/engine';
+import { generateToken } from './token.js';
 
 // Mirrors packages/server/src/table.ts (kept local so server code never enters the browser bundle).
 export interface PublicSeat {
@@ -29,12 +30,12 @@ function getToken(): string {
   try {
     let t = localStorage.getItem(key);
     if (!t) {
-      t = crypto.randomUUID();
+      t = generateToken();
       localStorage.setItem(key, t);
     }
     return t;
   } catch {
-    return crypto.randomUUID();
+    return generateToken();
   }
 }
 
@@ -47,7 +48,7 @@ export function useTable(): TableApi {
 
   useEffect(() => {
     const token = getToken();
-    const socket = io();
+    const socket = io({ auth: { token } });
     socketRef.current = socket;
     socket.on('connect', () => {
       setConnected(true);
