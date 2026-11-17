@@ -46,6 +46,7 @@ export function Opponent({
       <div className="plate">
         {view.dealer === seat && <span className="chip">{bg.dealerChip}</span>}
         <span className="plate-name">{info?.name ?? ''}</span>
+        {!isMe && <span className="count-chip">{count}</span>}
         {info && !info.connected && <span className="badge">{bg.waiting}</span>}
       </div>
       {revealed.length > 0 && (
