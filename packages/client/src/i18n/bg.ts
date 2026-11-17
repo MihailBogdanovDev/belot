@@ -31,4 +31,7 @@ export const bg = {
   title: 'Белот',
   connecting: 'Свързване…',
   menu: 'Меню',
+  dealerChip: 'Р',
+  bidPrefix: 'Обява',
+  deck: 'Тесте',
 };
